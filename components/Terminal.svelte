@@ -5,13 +5,6 @@
     --term_lightblue: #319de9;
     --term_border: #2f3739;
   }
-  .termUser {
-    color: var(--term_green);
-  }
-  .termAddr {
-    color: var(--term_lightblue);
-    word-spacing: 1rem;
-  }
   #terminal {
     background-color: var(--term_bg);
     height: 50vh;
@@ -19,21 +12,6 @@
     border: 10px solid var(--term_border);
     border-radius: 0.5rem;
     border-top: 30px solid var(--term_border);
-  }
-  .terminal .col {
-    text-align: left;
-  }
-  .terminal .col p {
-    display: flex;
-  }
-  .terminal input {
-    flex-grow: 1;
-    border: none;
-    background: none;
-    color: white;
-  }
-  #userInput:focus-visible {
-    outline: none;
   }
 </style>
 
@@ -46,7 +24,7 @@
     var term = new Terminal({
       cursorBlink: "block",
       fontSize: 18,
-      fontFamily: "Hack",
+      fontFamily: "Hack, monospace",
       theme: {
         background: "#232627",
         foreground: "#F5F8FA",
@@ -61,16 +39,103 @@
     });
     term.open(document.getElementById("terminal"), false);
     var shellprompt = "$ ";
-    var curr_line = "";
-    var entries = [];
+    var addrprompt = "\x1b[34m" + "~" + "\x1b[0m";
+    var userprompt = "\x1b[32m" + "user" + "\x1b[0m";
 
-    //term.onKey();
+    term.onData(e => {
+      switch (e) {
+        case "\u0003": // Ctrl+C
+          term.write("^C");
+          prompt(term);
+          break;
+        case "\r": // Enter
+          runCommand(term, command);
+          command = "";
+          break;
+        case "\u007F": // Backspace (DEL)
+          // Do not delete the prompt
+          if (term._core.buffer.x > 2) {
+            term.write("\b \b");
+            if (command.length > 0) {
+              command = command.substr(0, command.length - 1);
+            }
+          }
+          break;
+        default:
+          // Print all other characters for demo
+          if (
+            (e >= String.fromCharCode(0x20) && e <= String.fromCharCode(0x7b)) ||
+            e >= "\u00a0"
+          ) {
+            command += e;
+            term.write(e);
+          }
+      }
+    });
 
-    term.prompt = function() {
-      term.write("\r" + shellprompt);
+    function prompt(term) {
+      command = "";
+      term.write("\r\n$ ");
+    }
+
+    var command = "";
+    var commands = {
+      help: {
+        f: () => {
+          term.writeln(
+            [
+              "Here are the currently available commands.",
+              "",
+              ...Object.keys(commands).map(
+                e => `  ${e.padEnd(10)} ${commands[e].description}`
+              )
+            ].join("\n\r")
+          );
+          prompt(term);
+        },
+        description: "Prints this help message"
+      },
+      ls: {
+        f: () => {
+          term.writeln(
+            ["file1", "file2", "file3", "file4", "file5"].join("\r\n")
+          );
+          term.prompt(term);
+        },
+        description: "Prints the current directory's file structure."
+      }
     };
 
-    //term.writeln("");
+    function runCommand(term, text) {
+      const command = text.trim().split(" ")[0];
+      if (command.length > 0) {
+        term.writeln("");
+        if (command in commands) {
+          commands[command].f();
+          return;
+        }
+        term.writeln(`${command}: command not found`);
+      }
+      prompt(term);
+    }
+
+    term.prompt = function() {
+      term.write("\r" + userprompt + ":" + addrprompt + shellprompt);
+    };
+
+    let welcomeMsg = [
+      "                        *** FACTORY GAME ***",
+      "",
+      " Welcome! This is the terminal, it will be used to control almost",
+      " every aspect of your factory. I will explain how to use it.",
+      "",
+      " How about you start by looking around, you can change your location",
+      " at any time with cd (change directory) and use ls (list) to see what",
+      " is available.",
+      ""
+    ].join("\n\r");
+
+    term.writeln(welcomeMsg);
     term.prompt();
   });
 </script>
