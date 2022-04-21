@@ -18,7 +18,7 @@
 <script>
   import { onMount } from "svelte";
   import { Terminal } from "xterm";
-  import "xterm/css/xterm.css";
+  //import "xterm/css/xterm.css";
 
   onMount(async () => {
     var term = new Terminal({
