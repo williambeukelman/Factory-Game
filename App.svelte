@@ -1,6 +1,7 @@
 <script>
   import Terminal from "./components/Terminal.svelte";
   import GameView from "./components/GameView.svelte";
+  import Resize from "./components/Resize.svelte";
 </script>
 
 <style>
@@ -17,6 +18,7 @@
 <main>
   <div class="container-fluid">
     <GameView/>
+    <Resize/>
     <Terminal/>
   </div>
 </main>

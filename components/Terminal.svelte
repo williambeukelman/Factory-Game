@@ -1,24 +1,42 @@
 <style>
+  @import url("https://cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack-subset.css");
   :root {
     --term_green: #1cdc9a;
     --term_bg: #232627;
     --term_lightblue: #319de9;
     --term_border: #2f3739;
+    font-family: Hack, monospace;
   }
   #terminal {
     background-color: var(--term_bg);
-    height: 50vh;
+    height: var(--terminalHeight, 50vh);
     overflow: scroll;
     border: 10px solid var(--term_border);
     border-radius: 0.5rem;
-    border-top: 30px solid var(--term_border);
+    border-top: 2rem solid var(--term_border);
+    transition: 0.5s height cubic-bezier(0.19, 1, 0.22, 1);
+  }
+  .titlebar {
+    width: 100%;
+    height: 2rem;
+    background-color: transparent;
+    display: flex;
+    position: absolute;
+    padding: 0rem 1rem;
+  }
+  .titlebar button {
+    margin-right: 0.3rem;
+    padding: 0.1rem 0.5rem;
+    border: none;
   }
 </style>
 
 <script>
   import { onMount } from "svelte";
   import { Terminal } from "xterm";
-  //import "xterm/css/xterm.css";
+
+  let terminalHeight = "50vh";
+  $: cssVarStyles = `--terminalHeight:${terminalHeight}`;
 
   onMount(async () => {
     var term = new Terminal({
@@ -138,6 +156,31 @@
     term.writeln(welcomeMsg);
     term.prompt();
   });
+
+  let down_arrow = `
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-compact-down" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M1.553 6.776a.5.5 0 0 1 .67-.223L8 9.44l5.776-2.888a.5.5 0 1 1 .448.894l-6 3a.5.5 0 0 1-.448 0l-6-3a.5.5 0 0 1-.223-.67z"/>
+                      </svg>
+                      `;
+  let up_arrow = `
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-compact-up" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M7.776 5.553a.5.5 0 0 1 .448 0l6 3a.5.5 0 1 1-.448.894L8 6.56 2.224 9.447a.5.5 0 1 1-.448-.894l6-3z"/>
+                      </svg>
+                      `;
+
+  function maximize() {
+    terminalHeight = "50vh";
+  }
+
+  function minimize() {
+    terminalHeight = "0vh";
+  }
 </script>
 
-<div id="terminal"></div>
+<div class="titlebar">
+  <button class="btn btn-outline-light"
+  on:click={minimize}>{@html down_arrow}</button>
+  <button class="btn btn-outline-light"
+  on:click={maximize}>{@html up_arrow}</button>
+</div>
+<div id="terminal" style="{cssVarStyles}"></div>
