@@ -26,17 +26,20 @@
   }
   .titlebar button {
     margin-right: 0.3rem;
-    padding: 0.1rem 0.5rem;
+    padding: 0.1rem 0.2rem;
     border: none;
+  }
+  .titlebar button:hover {
+    filter: brightness(1.5);
   }
 </style>
 
 <script>
   import { onMount } from "svelte";
   import { Terminal } from "xterm";
+  import { terminalHeight, gameHeight } from "../store.js";
 
-  let terminalHeight = "50vh";
-  $: cssVarStyles = `--terminalHeight:${terminalHeight}`;
+  $: cssVarStyles = `--terminalHeight:${$terminalHeight + "vh"}`;
 
   onMount(async () => {
     var term = new Terminal({
@@ -158,29 +161,56 @@
   });
 
   let down_arrow = `
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-compact-down" viewBox="0 0 16 16">
-                      <path fill-rule="evenodd" d="M1.553 6.776a.5.5 0 0 1 .67-.223L8 9.44l5.776-2.888a.5.5 0 1 1 .448.894l-6 3a.5.5 0 0 1-.448 0l-6-3a.5.5 0 0 1-.223-.67z"/>
-                      </svg>
-                      `;
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-compact-down" viewBox="0 0 16 16">
+                                                                <path fill-rule="evenodd" d="M1.553 6.776a.5.5 0 0 1 .67-.223L8 9.44l5.776-2.888a.5.5 0 1 1 .448.894l-6 3a.5.5 0 0 1-.448 0l-6-3a.5.5 0 0 1-.223-.67z"/>
+                                                                </svg>
+                                                                `;
   let up_arrow = `
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-compact-up" viewBox="0 0 16 16">
-                      <path fill-rule="evenodd" d="M7.776 5.553a.5.5 0 0 1 .448 0l6 3a.5.5 0 1 1-.448.894L8 6.56 2.224 9.447a.5.5 0 1 1-.448-.894l6-3z"/>
-                      </svg>
-                      `;
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-compact-up" viewBox="0 0 16 16">
+                                                                <path fill-rule="evenodd" d="M7.776 5.553a.5.5 0 0 1 .448 0l6 3a.5.5 0 1 1-.448.894L8 6.56 2.224 9.447a.5.5 0 1 1-.448-.894l6-3z"/>
+                                                                </svg>
+                                                                `;
+
+  function middle() {
+    $gameHeight = 48;
+    $terminalHeight = 48;
+  }
 
   function maximize() {
-    terminalHeight = "50vh";
+    $gameHeight = 7;
+    $terminalHeight = 89;
   }
 
   function minimize() {
-    terminalHeight = "0vh";
+    $gameHeight = 89;
+    $terminalHeight = 7;
   }
 </script>
 
 <div class="titlebar">
+  <button class="btn minimize"
+  on:click={minimize}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#eb606b" class="bi bi-circle-fill" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="8"/>
+    </svg>
+  </button>
+  <button class="btn middle"
+  on:click={middle}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#f7eb95" class="bi bi-circle-fill" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="8"/>
+    </svg>
+  </button>
+  <button class="btn maximize"
+  on:click={maximize}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#2ecc71" class="bi bi-circle-fill" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="8"/>
+    </svg>
+  </button>
+<!--
   <button class="btn btn-outline-light"
   on:click={minimize}>{@html down_arrow}</button>
   <button class="btn btn-outline-light"
   on:click={maximize}>{@html up_arrow}</button>
+-->
 </div>
 <div id="terminal" style="{cssVarStyles}"></div>

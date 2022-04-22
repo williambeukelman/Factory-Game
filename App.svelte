@@ -12,6 +12,7 @@
     background-color: var(--bg-body);
     font-family: sans-serif;
     text-align: center;
+    padding: 2vh 0vw;
   }
 </style>
 
