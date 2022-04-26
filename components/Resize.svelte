@@ -11,7 +11,31 @@
 </style>
 
 <script>
+  import { terminalHeight, gameHeight } from "../store.js";
+  let viewHeight = 0;
+  let dragging = false;
+
+  function handleMousemove(event) {
+    viewHeight = Math.round((event.clientY / window.innerHeight) * 100);
+    if (dragging && viewHeight > 0 && viewHeight < 85) {
+      $gameHeight = viewHeight;
+      $terminalHeight = 95 - $gameHeight;
+    }
+  }
+
+  function dragHandle(event) {
+    dragging = true;
+  }
+  function releaseHandle(event) {
+    dragging = false;
+  }
 </script>
 
-<div>
+<svelte:window 
+  on:mousemove={handleMousemove}
+  on:mouseup={releaseHandle}
+  />
+<div 
+  on:mousedown={dragHandle}
+  >
 </div>

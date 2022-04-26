@@ -15,7 +15,7 @@
     align-items: center;
   }
   canvas {
-    border: 1px solid #ccc;
+    border: none;
   }
 </style>
 
@@ -59,10 +59,13 @@
 
     //Add to Group Function
     function addElementToGroup(x, y, e, group) {
-      fabric.Image.fromURL(e, function(img) {
-        img.set({ left: x, top: y });
-        group.addWithUpdate(img);
-      });
+      //Don't draw anything outside of canvas area
+      if (x < cWidth && y < cHeight) {
+        fabric.Image.fromURL(e, function(img) {
+          img.set({ left: x, top: y });
+          group.addWithUpdate(img);
+        });
+      }
     }
 
     //Initiate Groups
@@ -81,7 +84,7 @@
     }
 
     //Draw Rafters
-    for (var i = 0; i < cWidth / (grid * 2); i++) {
+    for (var i = 0; i < cWidth / 210; i++) {
       addElementToGroup(i * (grid * 3.5), grid, rafter, rafterGroup);
     }
 
@@ -94,7 +97,7 @@
     }
 
     //Draw Lighting and Windows
-    for (var i = 0.5; i < cWidth / (grid * 4); i++) {
+    for (var i = 0.5; i <= 4; i++) {
       addElementToGroup(i * (grid * 8), grid * 3.5, window, windowGroup);
       addElementToGroup(i * (grid * 10), 0, lamp, windowGroup);
     }
@@ -186,6 +189,7 @@
             });
             img.filters.push(maskFilter);
             img.applyFilters();
+            img["selectable"] = false;
             canvas.add(img);
             //canvas.add(mask);
             canvas.renderAll();
@@ -194,10 +198,47 @@
         { crossOrigin: "annonymous" }
       );
 
+      //console.log(canvas.getObjects());
+
       clearTimeout(myTimeout);
     }, 1000);
 
-    //canvas.add(gameDarkness);
+    canvas.on("mouse:wheel", function(opt) {
+      var delta = opt.e.deltaY;
+      var zoom = canvas.getZoom();
+      zoom *= 0.999 ** delta;
+      if (zoom > 2) zoom = 2;
+      if (zoom < 0.75) zoom = 0.75;
+      canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+      opt.e.preventDefault();
+      opt.e.stopPropagation();
+    });
+
+    canvas.on("mouse:down", function(opt) {
+      var evt = opt.e;
+      this.isDragging = true;
+      //this.selection = false;
+      this.lastPosX = evt.clientX;
+      this.lastPosY = evt.clientY;
+    });
+    canvas.on("mouse:move", function(opt) {
+      if (this.isDragging) {
+        var e = opt.e;
+        var vpt = this.viewportTransform;
+        vpt[4] += e.clientX - this.lastPosX;
+        vpt[5] += e.clientY - this.lastPosY;
+        this.requestRenderAll();
+        this.lastPosX = e.clientX;
+        this.lastPosY = e.clientY;
+      }
+    });
+    canvas.on("mouse:up", function(opt) {
+      // on mouse up we want to recalculate new interaction
+      // for all objects, so we call setViewportTransform
+      this.setViewportTransform(this.viewportTransform);
+      this.isDragging = false;
+      //this.selection = true;
+    });
   }); // End of aync onMount
 </script>
 
